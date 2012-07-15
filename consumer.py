@@ -1,4 +1,5 @@
 from jafka_utils import JafkaUtils,ByteBuffer;
+from messages import *;
 import jafka_utils,socket;
 
 class ByteBufferMessageSet(object):
@@ -29,7 +30,10 @@ class SimpleConsumer:
                 resultCode = responseByteBuffer.getShort();
                 print "receive message size:"+str(msgByteSize);
                 print("resultCode:"+str(resultCode));
-                
+                msgLength = responseByteBuffer.getInt();
+                msgBytes = responseByteBuffer.getBytes(msgLength);
+                stringMsg = StringMessage(msgBytes);
+                print(stringMsg.getMessage());
 
         def getRequestBytes(self,request):
                 requestKeySize = jafka_utils.SHORT_SIZE;
