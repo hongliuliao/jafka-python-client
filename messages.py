@@ -1,5 +1,8 @@
 from jafka_utils import ByteBuffer;
 
+'''
+A abstract base message
+'''
 class Message:
 	def __init__(self,msgBytes):
 		self.msgBytes = msgBytes;
