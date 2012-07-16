@@ -1,10 +1,7 @@
 from jafka_utils import JafkaUtils,ByteBuffer;
 from messages import *;
-<<<<<<< HEAD
-import jafka_utils,socket,time;
-=======
 import jafka_utils,socket;
->>>>>>> 602cc414a479d6e80a590609099dfb0b23133998
+
 
 class ByteBufferMessageSet(object):
 	"""This is a message set"""
