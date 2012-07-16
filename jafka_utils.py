@@ -13,17 +13,17 @@ class JafkaUtils(object):
 class ByteBuffer:
 
         def __init__(self,inputBytes,capacity=None):
-		if(inputBytes == None):
-			self.inputBytes = [];
-			self.limit = capacity;
-			if(capacity == None):
-				self.capacity = len(self.inputBytes);
-	                else:
-				self.capacity = capacity
-		else:
-			self.inputBytes = inputBytes;
-			self.limit = len(inputBytes);
-			self.currentIndex = 0;
+    		if(inputBytes == None):
+    			self.inputBytes = [];
+    			self.limit = capacity;
+    			if(capacity == None):
+    				self.capacity = len(self.inputBytes);
+    	                else:
+    				self.capacity = capacity
+    		else:
+    			self.inputBytes = inputBytes;
+    			self.limit = len(inputBytes);
+    		self.currentIndex = 0;
 
         @staticmethod
         def allocate(capacity):

@@ -1,10 +1,11 @@
 from jafka_utils import JafkaUtils,ByteBuffer;
-import jafka_utils,socket;
+from messages import *;
+import jafka_utils,socket,time;
 
 class ByteBufferMessageSet(object):
 	"""This is a message set"""
-	def __init__(self,byteBuffer):
-		self.byteBuffer = byteBuffer;
+	def __init__(self,allMsgBytes):
+		self.allMsgBytes = allMsgBytes;
     	
 
 class SimpleConsumer:
@@ -24,12 +25,21 @@ class SimpleConsumer:
                 requestBytes = self.getRequestBytes(request);
                 self.jafkaSocket.sendall(bytearray(requestBytes));
                 responseBytes = self.jafkaSocket.recv(64 * 1024);#It is the same as java client
+                # print("receive responseBytes:"+str(len(responseBytes)));
                 responseByteBuffer = ByteBuffer(responseBytes,None);
                 msgByteSize = responseByteBuffer.getInt();
                 resultCode = responseByteBuffer.getShort();
-                print "receive message size:"+str(msgByteSize);
-                print("resultCode:"+str(resultCode));
-                
+                while(len(responseBytes) != msgByteSize + 4):#if not receive completely we will get when read complete
+                    responseBytes = responseBytes + self.jafkaSocket.recv(64 * 1024);
+                responseByteBuffer = ByteBuffer(responseBytes,None);
+                responseByteBuffer.currentIndex = responseByteBuffer.currentIndex + 6;#add 6 is because the responseBytes is new and we don't need read msgByteSize and resultCode
+                # print("receive responseBytes length:"+str(len(responseBytes)));
+                # print "receive message size:"+str(msgByteSize);
+                # print("resultCode:"+str(resultCode));
+                msgBodySize = responseByteBuffer.getInt();
+                msgSizes = responseByteBuffer.getBytes(msgBodySize);
+                stringMsg = StringMessage(msgSizes);
+                print(stringMsg.getMessage());
 
         def getRequestBytes(self,request):
                 requestKeySize = jafka_utils.SHORT_SIZE;
@@ -79,6 +89,6 @@ class FetchRequest:
 # print fetchRequest.toBytes();
 consumer = SimpleConsumer("localhost",9092);
 consumer.connect();
-fetchRequest = FetchRequest("demo",0,0,64 * 1024);
+fetchRequest = FetchRequest("demo",0,488,64 * 1024);
 consumer.sendRequest(fetchRequest);
 consumer.close();
