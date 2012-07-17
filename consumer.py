@@ -3,11 +3,19 @@ from messages import *;
 import jafka_utils,socket;
 
 
-class ByteBufferMessageSet(object):
+class StringMessageSet(object):
 	"""This is a message set"""
 	def __init__(self,allMsgBytes):
 		self.allMsgBytes = allMsgBytes;
-    	
+		self.messageSetByteBuffer = ByteBuffer(self.allMsgBytes);
+		self.messageSet = [];
+
+	def getAllStringMessages(self):
+		while(self.messageSetByteBuffer.remaining() > 0):
+			msgSize = self.messageSetByteBuffer.getInt();
+			msgBytes = self.messageSetByteBuffer.getBytes(msgSize);
+			self.messageSet.append(StringMessage(msgBytes));
+		return self.messageSet;
 
 class SimpleConsumer:
 
@@ -30,6 +38,9 @@ class SimpleConsumer:
                 responseByteBuffer = ByteBuffer(responseBytes,None);
                 msgByteSize = responseByteBuffer.getInt();
                 resultCode = responseByteBuffer.getShort();
+                if(resultCode != 0):
+                    print("Can not get message success which resultCode:"+str(resultCode));
+                    return;
                 while(len(responseBytes) != msgByteSize + 4):#if not receive completely we will get when read complete
                     responseBytes = responseBytes + self.jafkaSocket.recv(64 * 1024);
                 responseByteBuffer = ByteBuffer(responseBytes,None);
@@ -37,10 +48,12 @@ class SimpleConsumer:
                 # print("receive responseBytes length:"+str(len(responseBytes)));
                 # print "receive message size:"+str(msgByteSize);
                 # print("resultCode:"+str(resultCode));
-                msgBodySize = responseByteBuffer.getInt();
-                msgSizes = responseByteBuffer.getBytes(msgBodySize);
-                stringMsg = StringMessage(msgSizes);
-                print(stringMsg.getMessage());
+                messageByteBuffer = responseByteBuffer.slice();
+                # print("message length:"+str(len(messageByteBuffer.array())));
+                stringMessageSet = StringMessageSet(messageByteBuffer.array());
+                allMessages = stringMessageSet.getAllStringMessages();
+                for message in allMessages:
+                    print(message.getMessage());
 
         def getRequestBytes(self,request):
                 requestKeySize = jafka_utils.SHORT_SIZE;
@@ -86,10 +99,8 @@ class FetchRequest:
         def getRequestKey(self):
                 return 1;
 
-#print JafkaUtils.getShortStringSize("aaa")
-# print fetchRequest.toBytes();
 consumer = SimpleConsumer("localhost",9092);
 consumer.connect();
-fetchRequest = FetchRequest("demo",0,488,64 * 1024);
+fetchRequest = FetchRequest("demo",0,0,64 * 1024);
 consumer.sendRequest(fetchRequest);
 consumer.close();

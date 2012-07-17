@@ -102,4 +102,8 @@ class ByteBuffer:
         def array(self):
             return self.inputBytes;
 
+        def slice(self):
+            subInputBytes = self.inputBytes[self.currentIndex:len(self.inputBytes)]
+            return ByteBuffer(subInputBytes);
+
 # byteBuffer = ByteBuffer.allocate(1);
