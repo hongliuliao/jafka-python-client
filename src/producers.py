@@ -15,8 +15,6 @@ class Producer:
 	def sendMessage(self,topicName,strMessages):
 		sendBytes = bytearray(ProducerRequest(topicName,strMessages).toBytes());
 		self.jafkaSocket.sendall(sendBytes);
-		responseBytes = self.jafkaSocket.recv(64 * 1024);
-		print responseBytes;
 
 class ProducerData:
 
