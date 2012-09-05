@@ -12,7 +12,7 @@ class JafkaUtils(object):
 
 class ByteBuffer:
 
-        def __init__(self,inputBytes,capacity=None):
+        def __init__(self,inputBytes=None,capacity=None):
     		if(inputBytes == None):
     			self.inputBytes = [];
     			self.limit = capacity;
@@ -51,6 +51,11 @@ class ByteBuffer:
                 for i in range(len(bytes)):
                         self.inputBytes.append(bytes[i]);
                 self.currentIndex = self.currentIndex + len(bytes);
+
+        def put(self,oneByte):
+                tempBytes = [];
+                tempBytes.append(oneByte);
+                self.putBytes(tempBytes);
 
         def get(self):
                 oneByte = self.inputBytes[self.currentIndex];
